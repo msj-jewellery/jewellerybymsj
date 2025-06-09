@@ -1,0 +1,37 @@
+your-project/
+├── jewelry-store/
+│   ├── src/
+│   │   └── api
+│   │   │     └──axiosInstance.js  
+│   │   ├── components/
+│   │   │     └── CartButton.jsx      
+│   │   │           CartModal.jsx  
+│   │   │           categoriesGrid.jsx  
+│   │   │           CollectionsCarousal.jsx  
+│   │   │           Header.jsx  
+│   │   │           Hero.jsx  
+│   │   │           ProductCard.jsx.jsx  
+│   │   ├── context 
+│   │   │      └── CartContext
+│   │   ├── pagessss
+│   │   │      └── Home.jsx   
+│   │   │      └── CheckOut.jsx   
+│   │   │      └── AllProducts.jsx   
+│   │   │      └── ProductDetail.jsx   
+│   │   ├── store
+│   │          └── cartStore.js           
+│   ├── App.jsx
+│   └── main.jsx
+│
+├── server/
+│   │
+│   │──models/
+│   │      └──product.js
+│   │──uploads/      
+│   ├── products.js    
+│   ├── upload.js     
+│   ├── seed.js      
+│   ├── server.js    
+
+
+http://localhost:5173/admin/add-product
