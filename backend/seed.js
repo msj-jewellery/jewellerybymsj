@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import Product from "../models/Product.js";
 
 config();
-
+ss
 const seedProducts = [
   {
     name: "Elegant Gold Necklace",
