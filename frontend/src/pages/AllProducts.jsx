@@ -8,9 +8,7 @@ import { IoChevronDown } from "react-icons/io5";
 const sortingOptions = [
   { label: "Best Matches", value: "recommended" },
   { label: "Price: Low to High", value: "priceLow" },
-  { label: "Price: High to Low", value: "priceHigh" },
-  { label: "Category: Jewelry", value: "jewelry" },
-  { label: "Category: Watches", value: "watches" },
+  { label: "Price: High to Low", value: "priceHigh" }
 ];
 
 const FilterBar = ({ sort, setSort, showBar }) => {
@@ -31,8 +29,6 @@ const FilterBar = ({ sort, setSort, showBar }) => {
       }`}
     >
       <div className="w-full px-4 sm:px-6 lg:px-10 py-4 flex flex-wrap sm:flex-nowrap items-start sm:items-center justify-between gap-4">
-        
-        {/* Filter Pills */}
         <div className="flex flex-wrap gap-3 items-center">
           {["₹25,000 - ₹50,000", "Gifts For Him", "Women"].map((label, i) => (
             <button
@@ -50,7 +46,6 @@ const FilterBar = ({ sort, setSort, showBar }) => {
           </button>
         </div>
 
-        {/* Sort Dropdown */}
         <div className="relative inline-block text-left">
           <button
             onClick={() => setShowDropdown((prev) => !prev)}
@@ -93,11 +88,14 @@ export default function AllProducts() {
   const [showFilterBar, setShowFilterBar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const activeFilter = searchParams.get("filter");
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get("/products");
         const data = Array.isArray(res.data) ? res.data : [];
+        console.log("📦 Products fetched:", data);
         setAllProducts(data);
         setProducts(data);
       } catch (err) {
@@ -110,18 +108,26 @@ export default function AllProducts() {
   }, []);
 
   useEffect(() => {
-    let sorted = [...allProducts];
-    if (sort === "priceLow") {
-      sorted.sort((a, b) => a.price - b.price);
-    } else if (sort === "priceHigh") {
-      sorted.sort((a, b) => b.price - a.price);
-    } else if (sort === "jewelry") {
-      sorted = allProducts.filter((p) => p.category?.toLowerCase() === "jewelry");
-    } else if (sort === "watches") {
-      sorted = allProducts.filter((p) => p.category?.toLowerCase() === "watches");
+    let updated = [...allProducts];
+
+    if (activeFilter) {
+      console.log("🔍 Filtering for:", activeFilter);
+      updated = updated.filter(
+        (p) =>
+          p.category?.toLowerCase().trim() ===
+          activeFilter.toLowerCase().trim()
+      );
     }
-    setProducts(sorted);
-  }, [sort, allProducts]);
+
+    if (sort === "priceLow") {
+      updated.sort((a, b) => a.price - b.price);
+    } else if (sort === "priceHigh") {
+      updated.sort((a, b) => b.price - a.price);
+    }
+
+    console.log("🎯 Final visible products:", updated);
+    setProducts(updated);
+  }, [sort, allProducts, activeFilter]);
 
   useEffect(() => {
     const sortParam = searchParams.get("sort");
@@ -142,7 +148,6 @@ export default function AllProducts() {
   return (
     <main className="min-h-screen bg-[#f9f6f1]">
       <section className="w-full px-4 sm:px-6 lg:px-10 pt-10 pb-20">
-        {/* Breadcrumb */}
         <nav className="text-sm text-gray-600 mb-2">
           <ol className="list-reset flex items-center space-x-1">
             <li>
@@ -155,18 +160,20 @@ export default function AllProducts() {
           </ol>
         </nav>
 
-        {/* Heading */}
         <div className="mb-6">
           <h1 className="text-[26px] md:text-[30px] font-serif font-bold text-gray-900 leading-tight">
             All Jewellery{" "}
             <span className="text-gray-500 font-sans text-lg">({products.length} results)</span>
           </h1>
+          {activeFilter && (
+            <p className="mt-1 text-gray-500 text-sm">
+              Showing results for category: <span className="font-medium text-gray-900">{activeFilter}</span>
+            </p>
+          )}
         </div>
 
-        {/* Filter & Sort */}
         <FilterBar sort={sort} setSort={setSort} showBar={showFilterBar} />
 
-        {/* Products Grid */}
         <motion.div
           layout
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6"
@@ -176,8 +183,8 @@ export default function AllProducts() {
               <ProductCard key={product._id} product={product} />
             ))
           ) : (
-            <p className="text-gray-500 col-span-full text-center">
-              No products found.
+            <p className="text-gray-500 col-span-full text-center py-10">
+              No products found for the selected category.
             </p>
           )}
         </motion.div>

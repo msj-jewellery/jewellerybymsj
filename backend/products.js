@@ -1,10 +1,11 @@
+// server/products.js
 import express from "express";
-import Product from "./models/product.js"; // Adjust path if needed
+import Product from "./models/product.js";
 import mongoose from "mongoose";
 
 const router = express.Router();
 
-// Get all products
+// ✅ Get all products (optionally featured)
 router.get("/", async (req, res) => {
   try {
     const query = {};
@@ -18,11 +19,26 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a single product by ID ✅
+// ✅ Search products by name
+router.get("/search", async (req, res) => {
+  try {
+    const query = req.query.q;
+    if (!query) return res.status(400).json({ message: "Query required" });
+
+    const products = await Product.find({
+      name: { $regex: query, $options: "i" },
+    }).limit(10);
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ Get single product by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
-  // Optional: validate MongoDB ObjectId format
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid product ID format" });
   }
@@ -38,7 +54,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Add a new product
+// ✅ Add new product
 router.post("/", async (req, res) => {
   try {
     const product = new Product(req.body);
