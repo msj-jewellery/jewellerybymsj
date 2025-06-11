@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import useCartStore from "../store/cartStore";
+import { useForm } from "react-hook-form";
+import toast, { Toaster } from "react-hot-toast";
 
 function UpiQRCode({ upiId, amount, onPaymentSuccess }) {
   const upiUrl = `upi://pay?pa=${upiId}&pn=Jewelry Store&am=${amount}&cu=INR`;
 
-  // Simulate automatic payment scan success after 5 seconds
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
-      onPaymentSuccess();
+      const timestamp = new Date().toISOString();
+      onPaymentSuccess(timestamp);
     }, 5000);
     return () => clearTimeout(timer);
   }, [onPaymentSuccess]);
@@ -32,38 +34,82 @@ export default function Checkout() {
   const cartItems = useCartStore((state) => state.cart);
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
-  const [orderData, setOrderData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    pincode: "",
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm();
 
-  const [paymentMethod, setPaymentMethod] = useState("cod"); // "cod" or "upi"
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [submitted, setSubmitted] = useState(false);
   const [upiInitiated, setUpiInitiated] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setOrderData({ ...orderData, [e.target.name]: e.target.value });
-  };
+  const onSubmit = async (data) => {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty!");
+      return;
+    }
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    if (paymentMethod === "cod") {
-      const confirmCod = window.confirm(
-        "You selected Cash on Delivery.\nAre you sure you want to place the order?"
-      );
-      if (confirmCod) {
-        setSubmitted(true);
-      }
-    } else if (paymentMethod === "upi") {
+    if (paymentMethod === "upi") {
       setUpiInitiated(true);
+      return;
+    }
+
+    setLoading(true);
+    const orderPayload = {
+      ...data,
+      paymentMethod,
+      cartItems,
+      totalPrice,
+    };
+
+    try {
+      await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+      setSubmitted(true);
+      toast.success("Order Placed Successfully!");
+      reset();
+    } catch (err) {
+      toast.error("Failed to place order.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUpiSuccess = () => {
-    setSubmitted(true);
+  const handleUpiSuccess = async (timestamp) => {
+    setLoading(true);
+    const orderPayload = {
+      paymentMethod: "upi",
+      upiTimestamp: timestamp,
+      cartItems,
+      totalPrice,
+      ...watchFields,
+    };
+
+    try {
+      await fetch("http://localhost:5000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+      setSubmitted(true);
+      toast.success("UPI Payment Confirmed and Order Placed!");
+      reset();
+    } catch (err) {
+      toast.error("Failed to place UPI order.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const watchFields = {};
+  const updateWatchFields = (field, value) => {
+    watchFields[field] = value;
   };
 
   return (
@@ -73,75 +119,55 @@ export default function Checkout() {
       transition={{ duration: 0.6 }}
       className="max-w-6xl mx-auto mt-16 p-10 bg-white shadow-2xl rounded-3xl border border-gray-200"
     >
+      <Toaster position="top-center" reverseOrder={false} />
+
       {!submitted ? (
         <div className="grid md:grid-cols-2 gap-14">
-          {/* LEFT: FORM */}
           <div>
-            <h2 className="text-4xl font-extrabold mb-6 text-gray-900 tracking-tight">
-              Secure Checkout
-            </h2>
-            <p className="text-gray-700 text-lg mb-10 max-w-lg leading-relaxed">
-              Please enter your details and choose a payment method to complete your order.
-            </p>
+            <h2 className="text-4xl font-extrabold mb-6 text-gray-900 tracking-tight">Secure Checkout</h2>
 
-            <form onSubmit={handleFormSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <input
-                  name="name"
-                  type="text"
-                  required
+                  {...register("name", { required: true })}
                   placeholder="Full Name"
-                  value={orderData.name}
-                  onChange={handleChange}
                   className="input-field-large"
+                  onChange={(e) => updateWatchFields("name", e.target.value)}
                 />
                 <input
-                  name="email"
+                  {...register("email", { required: true })}
                   type="email"
-                  required
-                  placeholder="Email Address"
-                  value={orderData.email}
-                  onChange={handleChange}
+                  placeholder="Email"
                   className="input-field-large"
+                  onChange={(e) => updateWatchFields("email", e.target.value)}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <input
-                  name="phone"
-                  type="tel"
-                  required
+                  {...register("phone", { required: true, pattern: /^[6-9]{1}[0-9]{9}$/ })}
                   placeholder="Phone Number"
-                  value={orderData.phone}
-                  onChange={handleChange}
                   className="input-field-large"
+                  onChange={(e) => updateWatchFields("phone", e.target.value)}
                 />
                 <input
-                  name="pincode"
-                  type="text"
-                  required
+                  {...register("pincode", { required: true, pattern: /^[1-9][0-9]{5}$/ })}
                   placeholder="Pincode"
-                  value={orderData.pincode}
-                  onChange={handleChange}
                   className="input-field-large"
+                  onChange={(e) => updateWatchFields("pincode", e.target.value)}
                 />
               </div>
 
               <textarea
-                name="address"
-                rows="5"
-                required
+                {...register("address", { required: true })}
                 placeholder="Full Address"
-                value={orderData.address}
-                onChange={handleChange}
-                className="input-field-large resize-none"
+                rows={5}
+                className="input-field-large"
+                onChange={(e) => updateWatchFields("address", e.target.value)}
               />
 
-              {/* PAYMENT OPTIONS */}
               <section className="mt-10 border border-gray-300 rounded-xl p-6 bg-gray-50">
-                <h3 className="text-xl font-semibold mb-4 text-gray-800">
-                  Choose Your Payment Method
-                </h3>
+                <h3 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Payment Method</h3>
 
                 <div className="space-y-4">
                   <label className="flex items-center space-x-3">
@@ -150,7 +176,10 @@ export default function Checkout() {
                       name="paymentMethod"
                       value="cod"
                       checked={paymentMethod === "cod"}
-                      onChange={() => setPaymentMethod("cod")}
+                      onChange={() => {
+                        setPaymentMethod("cod");
+                        setUpiInitiated(false);
+                      }}
                     />
                     <span className="text-gray-800 font-medium">Cash on Delivery</span>
                   </label>
@@ -161,7 +190,10 @@ export default function Checkout() {
                       name="paymentMethod"
                       value="upi"
                       checked={paymentMethod === "upi"}
-                      onChange={() => setPaymentMethod("upi")}
+                      onChange={() => {
+                        setPaymentMethod("upi");
+                        setUpiInitiated(false);
+                      }}
                     />
                     <span className="text-gray-800 font-medium">UPI Payment</span>
                   </label>
@@ -179,32 +211,30 @@ export default function Checkout() {
               {!upiInitiated && (
                 <motion.button
                   type="submit"
-                  className="w-full mt-10 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-xl py-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105"
+                  disabled={cartItems.length === 0 || loading}
+                  className={`w-full mt-10 bg-yellow-600 hover:bg-yellow-700 text-white font-bold text-xl py-4 rounded-2xl shadow-lg transition-transform transform hover:scale-105 flex justify-center items-center gap-3 ${
+                    cartItems.length === 0 || loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   whileTap={{ scale: 0.97 }}
                 >
-                  Proceed to {paymentMethod === "upi" ? "UPI Payment" : "Confirm Order"}
+                  {loading ? <Loader2 className="animate-spin" /> : null}
+                  {loading ? "Processing..." : paymentMethod === "upi" ? "Proceed to UPI Payment" : "Confirm Order"}
                 </motion.button>
               )}
             </form>
           </div>
 
-          {/* RIGHT: CART SUMMARY */}
           <aside className="bg-[#fffaf5] p-8 rounded-3xl shadow-lg max-h-[650px] sticky top-24">
             <h3 className="text-2xl font-semibold mb-6 text-gray-900">🛒 Your Cart</h3>
             <div className="space-y-5 max-h-[440px] overflow-y-auto pr-3 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-yellow-100">
               {cartItems.length ? (
                 cartItems.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center border-b border-yellow-300 pb-3"
-                  >
+                  <div key={idx} className="flex justify-between items-center border-b border-yellow-300 pb-3">
                     <div>
                       <p className="font-semibold text-gray-800">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-bold text-gray-900">
-                      ₹{(item.price * item.quantity).toFixed(2)}
-                    </p>
+                    <p className="font-bold text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 ))
               ) : (

@@ -9,7 +9,8 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 
 import productRoutes from "./products.js";
-import paymentRoutes from "./routes/payment.js"; // ✅
+import paymentRoutes from "./routes/payment.js";
+import orderRoutes from "./routes/orders.js"; // ✅ NEW
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.post("/api/upload", upload.array("images", 5), (req, res) => {
 // ✅ Routes
 app.use("/api/products", productRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/orders", orderRoutes); // ✅ NEW
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;

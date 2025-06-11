@@ -1,26 +1,26 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Home from "./pages/Home";
-import Checkout from './pages/CheckOut.jsx'; // ✅ Case-sensitive
-import AllProducts from "./pages/AllProducts.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
-import AddProduct from "./pages/AddProduct.jsx";
-import Footer from "./components/Footer.jsx";
-const App = () => {
-  return (
-    <div className="w-full min-h-screen bg-[#fdf7f2] overflow-x-hidden">
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import CheckOut from './pages/CheckOut';
+import AllProducts from './pages/AllProducts';
+import ProductDetail from './pages/ProductDetail';
 
-        <Header />
+function App() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/all-products" element={<AllProducts />} />
-          <Route path="/admin/add-product" element={<AddProduct />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/checkout" element={<CheckOut />} />
+          <Route path="/products" element={<AllProducts />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
         </Routes>
-        <Footer />
+      </main>
+      <Footer />
     </div>
   );
-};
+}
 
 export default App;

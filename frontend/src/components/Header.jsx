@@ -42,28 +42,33 @@ export default function Header() {
   ];
 
   return (
-    <nav className="sticky top-0 bg-white shadow-md z-50 font-serif transition-all duration-300">
+    <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 font-serif transition-all duration-300">
       {/* Top Header */}
       <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Logo and Menu */}
-        <div className="flex items-center space-x-4">
-          <motion.div
-            className="md:hidden cursor-pointer"
-            onClick={toggleMenu}
-            whileHover={{ scale: 1.2 }}
-            transition={{ type: 'spring', stiffness: 200 }}
-          >
-            {menuOpen ? <X size={28} /> : <Menu size={28} />}
-          </motion.div>
+        {/* Logo and Menu */}
+<div className="flex items-center space-x-4">
+  <motion.div
+    className="md:hidden cursor-pointer"
+    onClick={toggleMenu}
+    whileHover={{ scale: 1.2 }}
+    transition={{ type: 'spring', stiffness: 200 }}
+  >
+    {menuOpen ? <X size={28} /> : <Menu size={28} />}
+  </motion.div>
 
-          <motion.h1
-            className="text-3xl font-serif font-semibold tracking-widest text-black"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 250 }}
-          >
-            MS Jewels
-          </motion.h1>
-        </div>
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    transition={{ type: 'spring', stiffness: 250 }}
+  >
+    <img
+      src="/images/placeholder19.PNG"
+      alt="MS Jewels Logo"
+      className="h-16 md:h-18 w-auto object-contain"
+    />
+  </motion.div>
+</div>
+
 
         {/* Search */}
         <div className="w-full md:max-w-xl relative">
