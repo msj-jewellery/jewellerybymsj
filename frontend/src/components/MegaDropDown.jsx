@@ -18,7 +18,7 @@ export default function MegaDropdown() {
   const handleSubCategoryClick = (item) => {
     // Only navigate for Category filter
     if (selectedFilter === 'Category') {
-      navigate(`/all-products?filter=${encodeURIComponent(item)}`);
+      navigate(`/products?filter=${encodeURIComponent(item)}`);
     }
   };
 

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const categories = [
   { label: "Earrings", image: "/images/placeholder1.jpg", sortKey: "earrings" },
-  { label: "Finger Rings", image: "/images/placeholder2.jpg", sortKey: "rings" },
+  { label: "Rings", image: "/images/placeholder2.jpg", sortKey: "rings" },
   { label: "Pendants", image: "/images/placeholder3.jpg", sortKey: "pendants" },
   { label: "Mangalsutra", image: "/images/placeholder4.jpg", sortKey: "mangalsutra" },
   { label: "Bracelets", image: "/images/placeholder5.jpg", sortKey: "bracelets" },
@@ -15,7 +15,7 @@ const categories = [
     image: "/images/placeholder8.jpg",
     extra: "10+ Categories to choose from",
     special: true,
-    sortKey: "recommended"
+    sortKey: "recommended",
   },
 ];
 

@@ -1,3 +1,4 @@
+// File: src/pages/AllProducts.jsx
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
@@ -89,6 +90,7 @@ export default function AllProducts() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const activeFilter = searchParams.get("filter");
+  const sortParam = searchParams.get("sort");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -127,6 +129,10 @@ export default function AllProducts() {
   }, [sort, allProducts, activeFilter]);
 
   useEffect(() => {
+    if (sortParam) setSort(sortParam);
+  }, [sortParam]);
+
+  useEffect(() => {
     const scrollHandler = () => {
       const currentY = window.scrollY;
       setShowFilterBar(currentY < lastScrollY || currentY < 100);
@@ -137,14 +143,8 @@ export default function AllProducts() {
     return () => window.removeEventListener("scroll", scrollHandler);
   }, [lastScrollY]);
 
-  useEffect(() => {
-    const sortParam = searchParams.get("sort");
-    if (sortParam) setSort(sortParam);
-  }, [searchParams]);
-
   return (
     <div className="flex-grow bg-[#f9f6f1] pt-[160px]">
-
       <section className="min-h-[75vh] w-full px-4 sm:px-6 lg:px-10 pb-20">
         <nav className="text-sm text-gray-600 mb-2">
           <ol className="list-reset flex items-center space-x-1">
@@ -171,7 +171,9 @@ export default function AllProducts() {
           {activeFilter && (
             <p className="mt-1 text-gray-500 text-sm">
               Showing results for category:{" "}
-              <span className="font-medium text-gray-900">{activeFilter}</span>
+              <span className="font-medium text-gray-900">
+                {activeFilter}
+              </span>
             </p>
           )}
         </div>

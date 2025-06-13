@@ -5,28 +5,28 @@ const collections = [
   {
     title: "18KT Jewellery for Everyday Elegance",
     image: "/images/placeholder1.jpg",
-    span: "md:row-span-2 md:col-span-2", // ✅ Only span on medium screens and up
-    sortKey: "jewelry"
+    span: "md:row-span-2 md:col-span-2",
+    sortKey: "jewelry",
   },
   {
     title: "Stunning Every Ear",
     image: "/images/placeholder2.jpg",
-    sortKey: "earrings"
+    sortKey: "earrings",
   },
   {
     title: "Daily Wear Chains",
     image: "/images/placeholder3.jpg",
-    sortKey: "chains"
+    sortKey: "chains",
   },
   {
     title: "Bold Gold Designs",
     image: "/images/placeholder4.jpg",
-    sortKey: "bold"
+    sortKey: "bold",
   },
   {
     title: "New Arrivals",
     image: "/images/placeholder5.jpg",
-    sortKey: "recommended"
+    sortKey: "recommended",
   },
 ];
 

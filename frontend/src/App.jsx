@@ -14,8 +14,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/checkout" element={<CheckOut />} />
-          <Route path="/products" element={<AllProducts />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/products" element={<AllProducts />} /> {/* ✅ Fixed */}
+          <Route path="/products/:id" element={<ProductDetail />} />
         </Routes>
       </main>
       <Footer />
