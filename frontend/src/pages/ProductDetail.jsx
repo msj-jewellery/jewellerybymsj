@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
   const [currentImage, setCurrentImage] = useState(0);
   const [loading, setLoading] = useState(true);
   const addToCart = useCartStore((state) => state.addToCart);
@@ -15,17 +16,24 @@ const ProductDetail = () => {
   const BASE_URL = "http://localhost:5000";
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductAndOthers = async () => {
       try {
-        const res = await axios.get(`/products/${id}`);
-        setProduct(res.data);
+        const [productRes, allRes] = await Promise.all([
+          axios.get(`/products/${id}`),
+          axios.get(`/products`),
+        ]);
+
+        setProduct(productRes.data);
+        setAllProducts(
+          allRes.data.filter((p) => p._id !== id) // exclude current product
+        );
       } catch (error) {
-        console.error("Failed to fetch product:", error);
+        console.error("Failed to fetch product data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProduct();
+    fetchProductAndOthers();
   }, [id]);
 
   const nextImage = () =>
@@ -39,6 +47,11 @@ const ProductDetail = () => {
         ? (prev - 1 + product.images.length) % product.images.length
         : 0
     );
+
+  const getRecommended = () => {
+    const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4);
+  };
 
   if (loading || !product) {
     return (
@@ -101,7 +114,6 @@ const ProductDetail = () => {
 
       {/* 📄 Product Details */}
       <div className="grid md:grid-cols-2 gap-12">
-        {/* 📝 Info */}
         <div>
           <h1 className="text-3xl md:text-4xl font-bold font-serif text-gray-900 flex items-center gap-2">
             {product.name}
@@ -123,7 +135,7 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* 🛒 Images + CTA */}
+        {/* Images + CTA */}
         <div className="flex flex-col justify-between">
           <div className="flex flex-wrap gap-3 mt-2">
             {product.images?.map((img, i) => (
@@ -154,12 +166,15 @@ const ProductDetail = () => {
       <div className="mt-20">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">You May Also Like</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {/* These would be replaced by real related products */}
-          {[1, 2, 3, 4].map((n) => (
-            <div key={n} className="bg-white shadow rounded-lg p-4">
-              <div className="w-full h-40 bg-gray-100 rounded mb-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-3/4 mb-1"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          {getRecommended().map((item) => (
+            <div key={item._id} className="bg-white shadow rounded-lg p-4">
+              <img
+                src={`${BASE_URL}${item.images?.[0]}`}
+                alt={item.name}
+                className="w-full h-40 object-contain mb-3"
+              />
+              <h3 className="text-gray-800 font-semibold text-sm truncate">{item.name}</h3>
+              <p className="text-yellow-600 font-medium text-sm mt-1">₹{item.price.toLocaleString()}</p>
             </div>
           ))}
         </div>
