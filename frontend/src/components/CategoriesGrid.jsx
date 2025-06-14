@@ -3,27 +3,31 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
-  { label: "Earrings", image: "/images/placeholder1.jpg", sortKey: "earrings" },
-  { label: "Rings", image: "/images/placeholder2.jpg", sortKey: "rings" },
-  { label: "Pendants", image: "/images/placeholder3.jpg", sortKey: "pendants" },
-  { label: "Mangalsutra", image: "/images/placeholder4.jpg", sortKey: "mangalsutra" },
-  { label: "Bracelets", image: "/images/placeholder5.jpg", sortKey: "bracelets" },
-  { label: "Bangles", image: "/images/placeholder6.jpg", sortKey: "bangles" },
-  { label: "Chains", image: "/images/placeholder7.jpg", sortKey: "chains" },
+  { label: "Earrings", image: "/images/placeholder1.jpg", filter: "Earrings" },
+  { label: "Rings", image: "/images/placeholder2.jpg", filter: "Rings" },
+  { label: "Pendants", image: "/images/placeholder3.jpg", filter: "Pendants" },
+  { label: "Mangalsutra", image: "/images/placeholder4.jpg", filter: "Mangalsutra" },
+  { label: "Bracelets", image: "/images/placeholder5.jpg", filter: "Bracelets" },
+  { label: "Bangles", image: "/images/placeholder6.jpg", filter: "Bangles" },
+  { label: "Chains", image: "/images/placeholder7.jpg", filter: "Chains" },
   {
     label: "View All",
     image: "/images/placeholder8.jpg",
     extra: "10+ Categories to choose from",
     special: true,
-    sortKey: "recommended",
+    sort: "recommended",
   },
 ];
 
 const CategoriesGrid = () => {
   const navigate = useNavigate();
 
-  const handleClick = (sortKey) => {
-    navigate(`/products?sort=${sortKey}`);
+  const handleClick = (cat) => {
+    if (cat.sort) {
+      navigate(`/products?sort=${encodeURIComponent(cat.sort)}`);
+    } else if (cat.filter) {
+      navigate(`/products?filter=${encodeURIComponent(cat.filter)}`);
+    }
   };
 
   return (
@@ -39,7 +43,7 @@ const CategoriesGrid = () => {
         {categories.map((cat, idx) => (
           <motion.div
             key={idx}
-            onClick={() => handleClick(cat.sortKey)}
+            onClick={() => handleClick(cat)}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

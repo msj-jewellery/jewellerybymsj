@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import CheckOut from './pages/CheckOut';
 import AllProducts from './pages/AllProducts';
 import ProductDetail from './pages/ProductDetail';
+import AddProduct from './pages/AddProduct';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/checkout" element={<CheckOut />} />
           <Route path="/products" element={<AllProducts />} /> {/* ✅ Fixed */}
+          <Route path="/admin/add-product" element={<AddProduct />} />
           <Route path="/products/:id" element={<ProductDetail />} />
         </Routes>
       </main>

@@ -14,7 +14,6 @@ const sortingOptions = [
 
 const FilterBar = ({ sort, setSort, showBar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-
   const currentLabel =
     sortingOptions.find((opt) => opt.value === sort)?.label || "Sort";
 
@@ -26,24 +25,7 @@ const FilterBar = ({ sort, setSort, showBar }) => {
           : "opacity-0 -translate-y-6 pointer-events-none"
       }`}
     >
-      <div className="w-full px-4 sm:px-6 lg:px-10 py-4 flex flex-wrap sm:flex-nowrap items-start sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          {["₹25,000 - ₹50,000", "Gifts For Him", "Women"].map((label, i) => (
-            <button
-              key={i}
-              className="px-4 py-1.5 bg-white border border-gray-300 text-sm rounded-full flex items-center gap-2 hover:border-black transition"
-            >
-              <span className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs font-bold">
-                +
-              </span>
-              <span className="text-gray-800">{label}</span>
-            </button>
-          ))}
-          <button className="text-sm text-red-700 hover:underline">
-            + Show More
-          </button>
-        </div>
-
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-4 flex justify-end">
         <div className="relative inline-block text-left">
           <button
             onClick={() => setShowDropdown((prev) => !prev)}
