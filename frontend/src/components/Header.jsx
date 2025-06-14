@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Search } from 'lucide-react';
 import CartButton from './CartButton';
-import { Link as ScrollLink } from 'react-scroll';
+import { Link as ScrollLink, scroller } from 'react-scroll';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import MegaDropDown from './MegaDropDown'; // make sure this is the correct path
-
+import MegaDropDown from './MegaDropDown';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,14 +15,18 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [hoverMenu, setHoverMenu] = useState(null);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (searchTerm.trim()) {
-        axiosInstance.get(`/products/search?q=${searchTerm}`)
-          .then(res => setSearchResults(res.data))
-          .catch(err => console.error(err));
+        axiosInstance
+          .get(`/products/search?q=${searchTerm}`)
+          .then((res) => setSearchResults(res.data))
+          .catch((err) => console.error(err));
         setShowDropdown(true);
       } else {
         setSearchResults([]);
@@ -41,34 +45,53 @@ export default function Header() {
     { label: 'Contact', to: 'footer' },
   ];
 
+  const handleScrollLink = (to) => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        scroller.scrollTo(to, {
+          duration: 500,
+          smooth: true,
+          offset: -80,
+        });
+      }, 100); // wait until home loads
+    } else {
+      scroller.scrollTo(to, {
+        duration: 500,
+        smooth: true,
+        offset: -80,
+      });
+    }
+    setMenuOpen(false);
+  };
+
   return (
     <nav className="fixed top-0 left-0 w-full bg-white shadow-md z-50 font-serif transition-all duration-300">
       {/* Top Header */}
-      <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
         {/* Logo and Menu */}
-        {/* Logo and Menu */}
-<div className="flex items-center space-x-4">
-  <motion.div
-    className="md:hidden cursor-pointer"
-    onClick={toggleMenu}
-    whileHover={{ scale: 1.2 }}
-    transition={{ type: 'spring', stiffness: 200 }}
-  >
-    {menuOpen ? <X size={28} /> : <Menu size={28} />}
-  </motion.div>
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <motion.div
+            className="md:hidden cursor-pointer text-gray-900"
+            onClick={toggleMenu}
+            whileHover={{ scale: 1.2 }}
+            transition={{ type: 'spring', stiffness: 200 }}
+          >
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </motion.div>
 
-  <motion.div
-    whileHover={{ scale: 1.05 }}
-    transition={{ type: 'spring', stiffness: 250 }}
-  >
-    <img
-      src="/images/placeholder19.PNG"
-      alt="MS Jewels Logo"
-      className="h-16 md:h-18 w-auto object-contain"
-    />
-  </motion.div>
-</div>
-
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 250 }}
+            className="ml-2"
+          >
+            <img
+              src="/images/placeholder19.PNG"
+              alt="MS Jewels Logo"
+              className="h-12 md:h-16 w-auto object-contain"
+            />
+          </motion.div>
+        </div>
 
         {/* Search */}
         <div className="w-full md:max-w-xl relative">
@@ -76,7 +99,7 @@ export default function Header() {
             <input
               type="text"
               placeholder="Search for gold, diamond, rings..."
-              className="w-full border border-yellow-500 rounded-full py-3 px-6 pl-12 bg-white text-black shadow-sm focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              className="w-full border border-yellow-500 rounded-full py-2.5 px-6 pl-12 bg-white text-black shadow-sm focus:ring-2 focus:ring-yellow-400 focus:outline-none text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setShowDropdown(true)}
@@ -85,7 +108,6 @@ export default function Header() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
           </div>
 
-          {/* Search Dropdown */}
           <AnimatePresence>
             {showDropdown && searchResults.length > 0 && (
               <motion.ul
@@ -114,48 +136,42 @@ export default function Header() {
           </AnimatePresence>
         </div>
 
-        {/* Cart */}
+        {/* Cart for Desktop */}
         <div className="hidden md:flex items-center gap-4 text-gray-700">
           <CartButton />
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <div className="max-w-6xl mx-auto px-4 mt-2 pb-4 relative">
-        <ul className="hidden md:flex justify-between text-sm font-medium text-gray-800 relative z-10">
+      {/* Desktop Navigation */}
+      <div className="max-w-6xl mx-auto px-4 mt-2 pb-4 relative hidden md:block">
+        <ul className="flex justify-between text-sm font-medium text-gray-800 relative z-10">
           {navLinks.map(({ label, to, megaMenu }, index) => (
             <li
-  key={index}
-  className="cursor-pointer relative group"
-  onMouseEnter={() => megaMenu && setHoverMenu(label)}
-  onMouseLeave={() => megaMenu && setHoverMenu(null)}
->
-  <ScrollLink
-    to={to}
-    smooth={true}
-    duration={500}
-    offset={-100}
-    className="relative group text-black no-underline px-4 py-2 hover:text-yellow-700"
-  >
-    {label}
-  </ScrollLink>
-  {megaMenu && hoverMenu === label && (
-    <MegaDropDown />
-  )}
-</li>
-
+              key={index}
+              className="cursor-pointer relative group"
+              onMouseEnter={() => megaMenu && setHoverMenu(label)}
+              onMouseLeave={() => megaMenu && setHoverMenu(null)}
+            >
+              <span
+                onClick={() => handleScrollLink(to)}
+                className="relative group text-black no-underline px-4 py-2 hover:text-yellow-700"
+              >
+                {label}
+              </span>
+              {megaMenu && hoverMenu === label && <MegaDropDown />}
+            </li>
           ))}
         </ul>
       </div>
 
-      {/* Mobile Nav */}
+      {/* Mobile Navigation */}
       <AnimatePresence>
         {menuOpen && (
           <motion.ul
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="md:hidden bg-white shadow-md px-6 py-4 space-y-4 text-lg font-medium text-gray-800"
+            className="md:hidden bg-white shadow-md px-6 py-4 space-y-4 text-base font-medium text-gray-900"
           >
             {navLinks.map(({ label, to }, index) => (
               <motion.li
@@ -164,18 +180,14 @@ export default function Header() {
                 whileHover={{ color: '#B88A44' }}
                 transition={{ type: 'tween', duration: 0.3 }}
               >
-                <ScrollLink
-                  to={to}
-                  smooth={true}
-                  duration={500}
-                  offset={-80}
-                  onClick={() => setMenuOpen(false)}
-                >
+                <span onClick={() => handleScrollLink(to)}>
                   {label}
-                </ScrollLink>
+                </span>
               </motion.li>
             ))}
-            <CartButton />
+            <div className="pt-2">
+              <CartButton />
+            </div>
           </motion.ul>
         )}
       </AnimatePresence>
